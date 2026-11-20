@@ -105,7 +105,10 @@ function cosmosStore() {
 // Supabase: one table `records (id text pk, kind text, doc jsonb)`, created by db/supabase-setup.sql.
 // Talks to Supabase's REST API with the server-side secret key, so no extra npm packages are needed.
 function supabaseStore() {
-  const base = process.env.SUPABASE_URL.replace(/\/+$/, '') + '/rest/v1';
+  let url = process.env.SUPABASE_URL.trim().replace(/\/+$/, '');
+  // Accept a bare project ref ("abcdefghijklmnopqrst") or a host without https://.
+  if (!/^https?:\/\//i.test(url)) url = `https://${url.includes('.') ? url : `${url.toLowerCase()}.supabase.co`}`;
+  const base = url.replace(/\/rest\/v1$/, '') + '/rest/v1';
   const key = process.env.SUPABASE_SERVICE_KEY;
   const headers = { apikey: key, 'Content-Type': 'application/json' };
   if (key.startsWith('eyJ')) headers.Authorization = `Bearer ${key}`; // legacy service_role JWT
