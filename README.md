@@ -41,7 +41,6 @@ api/                       Azure Functions (Node 20, v4 programming model)
   src/lib/store.js         Cosmos DB data access (local JSON file when no connection string)
   src/lib/constants.js     States, groups, categories, SLA, seed catalog
 scripts/dev-server.js      Local server with fake sign-in for trying it out
-.github/workflows/         GitHub Actions deployment to Static Web Apps
 ```
 
 ## Run it locally (2 minutes)
@@ -96,12 +95,9 @@ inside the free 1000) and container `records` (partition key `/id`).
    - **Resource group:** `rg-itms`. **Name:** e.g. `gogreen-servicedesk`. **Plan type:** **Free**.
    - **Source:** GitHub → sign in → pick your organisation, repository and branch `main`.
    - **Build presets:** *Custom*. **App location:** `src`. **Api location:** `api`. **Output location:** leave empty.
-3. **Review + create.** Azure adds a workflow file and a deployment token secret to your repo.
-   - This repo already contains `.github/workflows/azure-static-web-apps.yml`. Azure will add its own workflow too.
-     Keep **one**: delete Azure's generated file and, in GitHub → **Settings → Secrets and variables → Actions**,
-     check the secret is named `AZURE_STATIC_WEB_APPS_API_TOKEN` (rename it in our workflow if Azure used a different name).
-   - If you created the app without GitHub, copy the token from the Static Web App → **Overview → Manage deployment token**
-     and add it as the `AZURE_STATIC_WEB_APPS_API_TOKEN` secret.
+3. **Review + create.** Azure commits a GitHub Actions workflow to the repo and stores the deployment token as a
+   repository secret. From then on every push to `main` redeploys the app automatically (about 2 minutes).
+   Watch progress in the repo's **Actions** tab.
 
 ### 3. Connect the app to the database
 
