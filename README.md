@@ -76,6 +76,16 @@ You'll need an Azure subscription (the free account works) and this code in a Gi
 
 Note: free Supabase projects pause after 7 days with no activity; open the app or the Supabase dashboard to wake it.
 
+<details><summary>Alternative: Azure Table Storage (a few cents a month, no extra sign-ups)</summary>
+
+```bash
+az storage account create -n <uniquename> -g rg-itms -l eastus2 --sku Standard_LRS --kind StorageV2 --min-tls-version TLS1_2 --allow-blob-public-access false
+CS=$(az storage account show-connection-string -n <uniquename> -g rg-itms -o tsv)
+az staticwebapp appsettings set -n go-green-servicedesk -g rg-itms --setting-names AZURE_TABLES_CONNECTION_STRING="$CS"
+```
+The app creates the `itmsrecords` table itself. When this setting is present it takes priority over Supabase and Cosmos DB.
+</details>
+
 <details><summary>Alternative: Azure Cosmos DB free tier</summary>
 
 1. In the [Azure portal](https://portal.azure.com) choose **Create a resource → Azure Cosmos DB → Azure Cosmos DB for NoSQL → Create**.

@@ -1,4 +1,5 @@
 // Data store. Picks, in this order:
+//   0. Azure Table Storage when AZURE_TABLES_CONNECTION_STRING is set
 //   1. Supabase (free Postgres) when SUPABASE_URL and SUPABASE_SERVICE_KEY are set
 //   2. Azure Cosmos DB (free tier) when COSMOS_CONNECTION_STRING is set
 //   3. a local JSON file (development only)
@@ -150,6 +151,96 @@ function supabaseStore() {
   };
 }
 
+// Azure Table Storage: table `itmsrecords`, PartitionKey = kind, RowKey = id.
+// Documents are stored as JSON split across doc0..docN string properties (64 KB limit each).
+function tableStore() {
+  const { TableClient } = require('@azure/data-tables');
+  const client = TableClient.fromConnectionString(
+    process.env.AZURE_TABLES_CONNECTION_STRING,
+    process.env.AZURE_TABLE_NAME || 'itmsrecords'
+  );
+  let ready;
+  const ensure = () => (ready = ready || client.createTable().catch((e) => { ready = null; throw e; }));
+  const CHUNK = 30000; // characters per property, safely under the 64 KB (UTF-16) limit
+  const kindOf = (id) =>
+    id.startsWith('INC') ? 'incident' : id.startsWith('REQ') ? 'request' : id.startsWith('cat-') ? 'catalog'
+      : id.startsWith('user-') ? 'user' : id.startsWith('counter-') ? 'counter' : 'other';
+  const pack = (doc) => {
+    const json = JSON.stringify(doc);
+    const e = { partitionKey: doc.kind || kindOf(doc.id), rowKey: doc.id, parts: Math.ceil(json.length / CHUNK) || 1 };
+    for (let i = 0; i < e.parts; i++) e[`doc${i}`] = json.slice(i * CHUNK, (i + 1) * CHUNK);
+    return e;
+  };
+  const unpack = (e) => {
+    let json = '';
+    for (let i = 0; i < (e.parts || 1); i++) json += e[`doc${i}`] || '';
+    return JSON.parse(json);
+  };
+  const notFound = (e) => e.statusCode === 404;
+  return {
+    async get(id) {
+      await ensure();
+      try {
+        return unpack(await client.getEntity(kindOf(id), id));
+      } catch (e) {
+        if (notFound(e)) return null;
+        throw e;
+      }
+    },
+    async list(kind) {
+      await ensure();
+      const out = [];
+      const safe = String(kind).replace(/'/g, "''");
+      for await (const e of client.listEntities({ queryOptions: { filter: `PartitionKey eq '${safe}'` } })) out.push(unpack(e));
+      return out;
+    },
+    async upsert(doc) {
+      await ensure();
+      if (doc.kind && doc.kind !== kindOf(doc.id)) throw new Error(`id ${doc.id} does not match kind ${doc.kind}`);
+      await client.upsertEntity(pack(doc), 'Replace');
+      return doc;
+    },
+    async remove(id) {
+      await ensure();
+      try {
+        await client.deleteEntity(kindOf(id), id);
+      } catch (e) {
+        if (!notFound(e)) throw e;
+      }
+    },
+    async nextNumber(prefix) {
+      await ensure();
+      const id = `counter-${prefix}`;
+      for (let attempt = 0; attempt < 10; attempt++) {
+        let e = null;
+        try {
+          e = await client.getEntity('counter', id);
+        } catch (err) {
+          if (!notFound(err)) throw err;
+        }
+        if (!e) {
+          try {
+            await client.createEntity({ partitionKey: 'counter', rowKey: id, value: 1001 });
+            return 1001;
+          } catch (err) {
+            if (err.statusCode === 409) continue;
+            throw err;
+          }
+        }
+        const value = Number(e.value) + 1;
+        try {
+          await client.updateEntity({ partitionKey: 'counter', rowKey: id, value }, 'Replace', { etag: e.etag });
+          return value;
+        } catch (err) {
+          if (err.statusCode === 412) continue;
+          throw err;
+        }
+      }
+      throw new Error('Could not allocate a ticket number, please retry');
+    },
+  };
+}
+
 function fileStore() {
   const file = process.env.LOCAL_DATA_FILE || path.join(__dirname, '..', '..', 'data', 'local-db.json');
   let data = null;
@@ -196,7 +287,8 @@ function fileStore() {
 
 function store() {
   if (!impl) {
-    if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) impl = supabaseStore();
+    if (process.env.AZURE_TABLES_CONNECTION_STRING) impl = tableStore();
+    else if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) impl = supabaseStore();
     else if (process.env.COSMOS_CONNECTION_STRING) impl = cosmosStore();
     else impl = fileStore();
   }
