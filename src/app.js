@@ -403,7 +403,7 @@
 
     shell(`
       <div class="page-head">
-        <h1>${esc(t.number)}</h1>${prioBadge(t.priority)} ${stateBadge(t.state)} ${t.slaBreached ? '<span class="badge" style="color:var(--p1)">SLA breached</span>' : ''}
+        <h1>${esc(t.number)}</h1>${prioBadge(t.priority)} ${stateBadge(t.state)} ${t.slaBreached ? '<span class="badge" style="color:var(--danger)">SLA breached</span>' : ''}
         <div class="actions">${actionBtns}</div>
       </div>
       <h2 style="font-weight:500;margin-top:-6px">${esc(t.shortDescription)}</h2>
