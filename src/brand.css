@@ -1,42 +1,38 @@
 /*
-  GO-Green Technologies brand tokens.
+  GO-Green Technologies brand tokens, taken from go-greentechnologies.com.
   Change these to re-skin the whole app.
-
-  - --brand-900 is the site's theme colour (#0d2b1d, from go-greentechnologies.com).
-  - The lighter greens and the accent green are derived to sit with it.
-    If you have the official brand guide, replace the values here.
-  - Fonts: Poppins (headings) + Inter (body). Swap the Google Fonts link in
-    index.html and the two --font-* tokens if the website uses different ones.
+  - Colours: the website's own palette (ink, green-800/700/600, accent, lime, paper, mint, line).
+  - Fonts: Space Grotesk for headings (as on the website) and Inter for body text.
 */
 :root {
   --brand-900: #0d2b1d;
-  --brand-800: #123b28;
-  --brand-700: #1a5236;
-  --brand-600: #1f7a45;
-  --brand-500: #2ea65a;
-  --brand-400: #4cc674;
+  --brand-800: #14402b;
+  --brand-700: #1a6b3c;
+  --brand-600: #228a49;
+  --brand-500: #1f9d55;
+  --brand-400: #62d37a;
   --brand-100: #e3f5e9;
-  --brand-50: #f2faf5;
-  /* Accent green (was solar yellow): used for highlights, "resolved" bars, work notes. */
-  --sun-500: #8cd35f;
-  --sun-100: #ecf8e2;
+  --brand-50: #eef6ee;
+  /* Lime accent: highlights, "resolved" bars, work notes. */
+  --sun-500: #7edf7c;
+  --sun-100: #eef6ee;
 
-  --font-heading: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-heading: 'Space Grotesk', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
-  --bg: #f1f7f3;
+  --bg: #f5f7f2;
   --surface: #ffffff;
   --surface-2: #f4faf6;
-  --border: #d3e6da;
+  --border: #dfe8e0;
   --text: #15241c;
-  --text-2: #4d5f55;
+  --text-2: #57675d;
   --text-3: #7a8a81;
 
   /* Priority dots: darkest green = most urgent. */
   --p1: #0d2b1d;
-  --p2: #1a5236;
-  --p3: #2ea65a;
-  --p4: #6cc98a;
+  --p2: #1a6b3c;
+  --p3: #1f9d55;
+  --p4: #62d37a;
   --p5: #b5dfc3;
   /* Errors and breached SLAs stay red so they can't be missed. */
   --danger: #c62828;

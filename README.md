@@ -22,13 +22,11 @@ Running cost on the free tiers: **$0**.
 
 Colours, fonts and the logo are in two places so they're easy to change:
 
-- `src/brand.css` holds every colour and font token. `--brand-900` is the site's own theme colour `#0d2b1d`.
-  The lighter greens and the solar yellow were derived from it.
+- `src/brand.css` holds every colour and font token, taken from the website's own palette (all greens).
 - The header loads the live logo from `https://www.go-greentechnologies.com/logo-full.svg` and falls back to
   `src/assets/logo-full.svg` (a placeholder wordmark). **Replace `src/assets/logo-full.svg` with the official file**
   so the app doesn't depend on the website.
-- Fonts are Poppins (headings) and Inter (body) from Google Fonts. If the website uses different fonts,
-  change the `<link>` in `src/index.html` and the `--font-*` tokens in `src/brand.css`.
+- Fonts match the website: Space Grotesk for headings and Inter for body text (Google Fonts link in `src/index.html`).
 
 ## Project layout
 
