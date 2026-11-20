@@ -76,7 +76,10 @@
     $app.innerHTML = `
       <div class="login">
         <div class="hero">
-          <div style="font-family:var(--font-heading);letter-spacing:.12em;font-size:12px;color:#9cc7ad">VOICE · DATA · POWER · SECURITY</div>
+          <div class="hero-top">
+            <span class="logo-chip">${logoImg('logo')}</span>
+            <span class="hero-tag">VOICE · DATA · POWER · SECURITY</span>
+          </div>
           <div>
             <h1>IT support that keeps your business <span class="sun">powered</span>, <span class="sun">secure</span> and <span class="sun">connected</span>.</h1>
             <p style="max-width:440px;color:#b9d6c4">Report an issue, request a service and track every ticket in one place.</p>
