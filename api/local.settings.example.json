@@ -3,7 +3,9 @@
   "Values": {
     "FUNCTIONS_WORKER_RUNTIME": "node",
     "AzureWebJobsStorage": "",
-    "COSMOS_CONNECTION_STRING": "AccountEndpoint=https://<your-account>.documents.azure.com:443/;AccountKey=<key>;",
+    "SUPABASE_URL": "https://<project>.supabase.co",
+    "SUPABASE_SERVICE_KEY": "<secret or service_role key>",
+    "COSMOS_CONNECTION_STRING": "",
     "COSMOS_DATABASE": "itms",
     "COSMOS_CONTAINER": "records",
     "ADMIN_EMAILS": "you@example.com"

@@ -1,5 +1,7 @@
-// Data store. Uses Azure Cosmos DB (free tier) when COSMOS_CONNECTION_STRING is set,
-// otherwise a local JSON file (for development only).
+// Data store. Picks, in this order:
+//   1. Supabase (free Postgres) when SUPABASE_URL and SUPABASE_SERVICE_KEY are set
+//   2. Azure Cosmos DB (free tier) when COSMOS_CONNECTION_STRING is set
+//   3. a local JSON file (development only)
 //
 // Every record lives in ONE container, partitioned by /id, with a `kind` field:
 //   incident | request | catalog | user | counter
@@ -100,6 +102,51 @@ function cosmosStore() {
   };
 }
 
+// Supabase: one table `records (id text pk, kind text, doc jsonb)`, created by db/supabase-setup.sql.
+// Talks to Supabase's REST API with the server-side secret key, so no extra npm packages are needed.
+function supabaseStore() {
+  const base = process.env.SUPABASE_URL.replace(/\/+$/, '') + '/rest/v1';
+  const key = process.env.SUPABASE_SERVICE_KEY;
+  const headers = { apikey: key, 'Content-Type': 'application/json' };
+  if (key.startsWith('eyJ')) headers.Authorization = `Bearer ${key}`; // legacy service_role JWT
+
+  async function call(path, opts = {}) {
+    const res = await fetch(base + path, { ...opts, headers: { ...headers, ...(opts.headers || {}) } });
+    const text = await res.text();
+    if (!res.ok) throw new Error(`Supabase ${res.status}: ${text.slice(0, 300)}`);
+    return text ? JSON.parse(text) : null;
+  }
+  const enc = encodeURIComponent;
+  return {
+    async get(id) {
+      const rows = await call(`/records?id=eq.${enc(id)}&select=doc`);
+      return rows.length ? rows[0].doc : null;
+    },
+    async list(kind) {
+      const out = [];
+      for (let offset = 0; ; offset += 1000) {
+        const rows = await call(`/records?kind=eq.${enc(kind)}&select=doc&order=id&limit=1000&offset=${offset}`);
+        rows.forEach((r) => out.push(r.doc));
+        if (rows.length < 1000) return out;
+      }
+    },
+    async upsert(doc) {
+      await call('/records?on_conflict=id', {
+        method: 'POST',
+        headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+        body: JSON.stringify({ id: doc.id, kind: doc.kind, doc }),
+      });
+      return doc;
+    },
+    async remove(id) {
+      await call(`/records?id=eq.${enc(id)}`, { method: 'DELETE' });
+    },
+    async nextNumber(prefix) {
+      return Number(await call('/rpc/next_number', { method: 'POST', body: JSON.stringify({ p_prefix: prefix }) }));
+    },
+  };
+}
+
 function fileStore() {
   const file = process.env.LOCAL_DATA_FILE || path.join(__dirname, '..', '..', 'data', 'local-db.json');
   let data = null;
@@ -145,7 +192,11 @@ function fileStore() {
 }
 
 function store() {
-  if (!impl) impl = process.env.COSMOS_CONNECTION_STRING ? cosmosStore() : fileStore();
+  if (!impl) {
+    if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) impl = supabaseStore();
+    else if (process.env.COSMOS_CONNECTION_STRING) impl = cosmosStore();
+    else impl = fileStore();
+  }
   return impl;
 }
 

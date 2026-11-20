@@ -1,7 +1,8 @@
 # GO-Green IT Service Desk
 
 A ServiceNow-style IT service management (ITSM) app for GO-Green Technologies, built for
-**Azure Static Web Apps (Free plan)** with an **Azure Functions** API and **Azure Cosmos DB free tier**.
+**Azure Static Web Apps (Free plan)** with an **Azure Functions** API and a free database:
+**Supabase free Postgres** (default) or **Azure Cosmos DB free tier**.
 Running cost on the free tiers: **$0**.
 
 ## What it does
@@ -38,7 +39,8 @@ src/                       Front end (plain HTML/CSS/JS, no build step)
 api/                       Azure Functions (Node 20, v4 programming model)
   src/functions/api.js     Registers all HTTP routes
   src/lib/handlers.js      Business logic (tickets, workflow, catalog, users, stats)
-  src/lib/store.js         Cosmos DB data access (local JSON file when no connection string)
+  src/lib/store.js         Data access: Supabase, Cosmos DB, or a local JSON file
+db/supabase-setup.sql      One-time Supabase table setup
   src/lib/constants.js     States, groups, categories, SLA, seed catalog
 scripts/dev-server.js      Local server with fake sign-in for trying it out
 ```
@@ -65,7 +67,18 @@ copy `api/local.settings.example.json` to `api/local.settings.json`, then `swa s
 
 You'll need an Azure subscription (the free account works) and this code in a GitHub repository.
 
-### 1. Create the free database (Azure Cosmos DB for NoSQL)
+### 1. Create the free database (Supabase)
+
+1. Sign up at [supabase.com](https://supabase.com) and click **New project** (Free plan).
+   Name it e.g. `go-green-itms`, set a database password (keep it safe), region **West EU (Ireland)** or closest to you.
+2. When it's ready, open **SQL Editor → New query**, paste the contents of [`db/supabase-setup.sql`](db/supabase-setup.sql), click **Run**.
+3. Open **Project Settings → API Keys** (or **Data API**) and note:
+   - the **Project URL**, like `https://abcd1234.supabase.co`
+   - the **secret** key (`sb_secret_…`), or on older projects the **service_role** key. Never put this key in front-end code.
+
+Note: free Supabase projects pause after 7 days with no activity; open the app or the Supabase dashboard to wake it.
+
+<details><summary>Alternative: Azure Cosmos DB free tier</summary>
 
 1. In the [Azure portal](https://portal.azure.com) choose **Create a resource → Azure Cosmos DB → Azure Cosmos DB for NoSQL → Create**.
 2. Fill in:
@@ -88,6 +101,9 @@ inside the free 1000) and container `records` (partition key `/id`).
 > az cosmosdb keys list -n gogreen-itms -g rg-itms --type connection-strings --query "connectionStrings[0].connectionString" -o tsv
 > ```
 
+Then set `COSMOS_CONNECTION_STRING` instead of the Supabase variables in step 3.
+</details>
+
 ### 2. Create the Static Web App
 
 1. Push this folder to a GitHub repository (branch `main`).
@@ -105,11 +121,12 @@ Static Web App → **Settings → Environment variables** → add, then **Apply*
 
 | Name | Value |
 | --- | --- |
-| `COSMOS_CONNECTION_STRING` | the connection string from step 1 |
+| `SUPABASE_URL` | the Project URL from step 1 |
+| `SUPABASE_SERVICE_KEY` | the secret / service_role key from step 1 |
 | `ADMIN_EMAILS` | your sign-in email, e.g. `it@go-greentechnologies.com` (comma-separate several) |
 | `ALLOWED_EMAIL_DOMAINS` | *(recommended)* `go-greentechnologies.com` so only staff can sign in |
 
-Optional: `COSMOS_DATABASE` (default `itms`), `COSMOS_CONTAINER` (default `records`).
+With Cosmos DB instead: `COSMOS_CONNECTION_STRING`, optional `COSMOS_DATABASE` (default `itms`), `COSMOS_CONTAINER` (default `records`).
 
 ### 4. First sign-in
 
@@ -129,9 +146,9 @@ Optional: `COSMOS_DATABASE` (default `itms`), `COSMOS_CONTAINER` (default `recor
 ## Limits of the free tiers
 
 - Static Web Apps Free: 100 GB bandwidth/month, 2 custom domains, managed Functions API included.
-- Cosmos DB free tier: 1000 RU/s and 25 GB. That is plenty for a service desk with tens of thousands of tickets.
-  Lists are filtered in the API, which is fine at that scale; if you grow past ~20k tickets, add
-  Cosmos queries per filter in `api/src/lib/store.js`.
+- Supabase Free: 500 MB database, pauses after a week of no use. Cosmos DB free tier: 1000 RU/s and 25 GB.
+  Either is plenty for tens of thousands of tickets. Lists are filtered in the API, which is fine at that scale;
+  past ~20k tickets, push the filters down into the queries in `api/src/lib/store.js`.
 
 ## API reference
 
