@@ -1,0 +1,9 @@
+{
+  "name": "go-green-itms",
+  "private": true,
+  "description": "GO-Green IT Service Desk: ServiceNow-style ITSM on Azure Static Web Apps + Cosmos DB free tier",
+  "scripts": {
+    "postinstall": "cd api && npm install",
+    "dev": "node scripts/dev-server.js"
+  }
+}

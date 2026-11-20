@@ -1,0 +1,19 @@
+// One table of API routes, used by Azure Functions and the local dev server.
+module.exports = [
+  { fn: 'me', method: 'GET', route: 'me' },
+  { fn: 'updateMe', method: 'PATCH', route: 'me' },
+  { fn: 'meta', method: 'GET', route: 'meta' },
+  { fn: 'stats', method: 'GET', route: 'stats' },
+  { fn: 'listTickets', method: 'GET', route: 'tickets' },
+  { fn: 'createTicket', method: 'POST', route: 'tickets' },
+  { fn: 'getTicket', method: 'GET', route: 'tickets/{id}' },
+  { fn: 'updateTicket', method: 'PATCH', route: 'tickets/{id}' },
+  { fn: 'addComment', method: 'POST', route: 'tickets/{id}/comments' },
+  { fn: 'listCatalog', method: 'GET', route: 'catalog' },
+  { fn: 'saveCatalogItem', method: 'POST', route: 'catalog' },
+  { fn: 'saveCatalogItem', method: 'PUT', route: 'catalog/{id}' },
+  { fn: 'deleteCatalogItem', method: 'DELETE', route: 'catalog/{id}' },
+  { fn: 'orderCatalogItem', method: 'POST', route: 'catalog/{id}/order' },
+  { fn: 'listUsers', method: 'GET', route: 'users' },
+  { fn: 'updateUser', method: 'PATCH', route: 'users/{id}' },
+];

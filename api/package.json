@@ -1,0 +1,13 @@
+{
+  "name": "itms-api",
+  "version": "1.0.0",
+  "description": "GO-Green IT Service Management API (Azure Functions, Node v4 model)",
+  "main": "src/functions/*.js",
+  "scripts": {
+    "start": "func start"
+  },
+  "dependencies": {
+    "@azure/cosmos": "^4.1.1",
+    "@azure/functions": "^4.5.1"
+  }
+}

@@ -1,0 +1,42 @@
+/*
+  GO-Green Technologies brand tokens.
+  Change these to re-skin the whole app.
+
+  - --brand-900 is the site's theme colour (#0d2b1d, from go-greentechnologies.com).
+  - The lighter greens and the solar yellow are derived to sit with it.
+    If you have the official brand guide, replace the values here.
+  - Fonts: Poppins (headings) + Inter (body). Swap the Google Fonts link in
+    index.html and the two --font-* tokens if the website uses different ones.
+*/
+:root {
+  --brand-900: #0d2b1d;
+  --brand-800: #123b28;
+  --brand-700: #1a5236;
+  --brand-600: #1f7a45;
+  --brand-500: #2ea65a;
+  --brand-400: #4cc674;
+  --brand-100: #e3f5e9;
+  --brand-50: #f2faf5;
+  --sun-500: #f4b400;
+  --sun-100: #fff4cc;
+
+  --font-heading: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --bg: #f4f7f5;
+  --surface: #ffffff;
+  --surface-2: #f8faf9;
+  --border: #dde5e0;
+  --text: #15241c;
+  --text-2: #4d5f55;
+  --text-3: #7a8a81;
+
+  --p1: #c62828;
+  --p2: #ef6c00;
+  --p3: #f4b400;
+  --p4: #2ea65a;
+  --p5: #607d8b;
+
+  --radius: 10px;
+  --shadow: 0 1px 2px rgba(13, 43, 29, 0.06), 0 4px 16px rgba(13, 43, 29, 0.06);
+}
