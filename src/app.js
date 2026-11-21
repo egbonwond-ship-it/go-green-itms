@@ -2,8 +2,15 @@
 (() => {
   'use strict';
 
-  const LOGO_REMOTE = 'https://www.go-greentechnologies.com/logo-full.svg';
-  const LOGO_LOCAL = 'assets/logo-full.svg';
+  const LOGO = 'assets/logo-full.svg';
+  // Production address. Visits to the default Azure address are sent here so everyone
+  // signs in on one domain.
+  const CANONICAL_HOST = 'support.go-greentechnologies.com';
+  const DEFAULT_AZURE_HOST = 'blue-moss-0ffce530f.4.azurestaticapps.net';
+  if (location.hostname === DEFAULT_AZURE_HOST) {
+    location.replace(`https://${CANONICAL_HOST}${location.pathname}${location.search}${location.hash}`);
+    return;
+  }
   const state = { me: null, meta: null, users: null, catalog: null, counts: {} };
   const $app = document.getElementById('app');
 
@@ -68,7 +75,7 @@
   }
 
   const logoImg = (cls = 'logo') =>
-    `<img class="${cls}" src="${LOGO_REMOTE}" alt="GO-Green Technologies" onerror="this.onerror=null;this.src='${LOGO_LOCAL}'">`;
+    `<img class="${cls}" src="${LOGO}" alt="GO-Green Technologies">`;
 
   // ---------- login ----------
   function renderLogin() {

@@ -189,6 +189,14 @@ async function resolveAssignee(id) {
 }
 
 const routes = {
+  // Public: used by uptime checks and the daily keep-alive job. Touches the database
+  // so a paused or unreachable database shows up here.
+  async health() {
+    const started = Date.now();
+    await store().get('counter-INC');
+    return ok({ ok: true, db: 'up', ms: Date.now() - started, at: nowIso() });
+  },
+
   async me({ principal }) {
     const user = await currentUser(principal);
     return ok({ user: { id: user.id, name: user.name, email: user.email, role: user.role, provider: user.provider } });

@@ -1,5 +1,6 @@
 // One table of API routes, used by Azure Functions and the local dev server.
 module.exports = [
+  { fn: 'health', method: 'GET', route: 'health', anonymous: true },
   { fn: 'me', method: 'GET', route: 'me' },
   { fn: 'updateMe', method: 'PATCH', route: 'me' },
   { fn: 'meta', method: 'GET', route: 'meta' },

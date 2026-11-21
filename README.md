@@ -151,6 +151,16 @@ With Cosmos DB instead: `COSMOS_CONNECTION_STRING`, optional `COSMOS_DATABASE` (
 - To restrict sign-in to your own Microsoft Entra tenant only, upgrade the Static Web App to the **Standard** plan and
   configure a custom Entra ID provider.
 
+## Production setup
+
+- Live at **https://support.go-greentechnologies.com** (GoDaddy CNAME `support` → the Static Web App). Visits to the default
+  `*.azurestaticapps.net` address are redirected there.
+- Only `main` deploys. Pull-request preview sites are switched off.
+- Security headers: strict Content-Security-Policy, HSTS, no framing, no camera/mic/location.
+- `GET /api/health` is public. It checks the database and returns `{"ok":true}`.
+  `.github/workflows/keep-alive.yml` calls it daily at 07:00 Lagos time, which stops the free Supabase project from pausing,
+  and fails (GitHub emails you) if the site or database is down.
+
 ## Limits of the free tiers
 
 - Static Web Apps Free: 100 GB bandwidth/month, 2 custom domains, managed Functions API included.

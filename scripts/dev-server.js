@@ -10,6 +10,9 @@ const routes = require('../api/src/lib/routes');
 const { run } = require('../api/src/lib/handlers');
 
 const PORT = Number(process.env.PORT) || 4280;
+// Apply the same security headers as production (minus HSTS, which needs HTTPS).
+const { globalHeaders = {} } = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'src', 'staticwebapp.config.json'), 'utf8'));
+delete globalHeaders['Strict-Transport-Security'];
 const ROOT = path.join(__dirname, '..', 'src');
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.json': 'application/json', '.ico': 'image/x-icon', '.webp': 'image/webp' };
 
@@ -40,6 +43,7 @@ function match(pattern, pathname) {
 
 http
   .createServer(async (req, res) => {
+    for (const [k, v] of Object.entries(globalHeaders)) res.setHeader(k, v);
     const url = new URL(req.url, `http://localhost:${PORT}`);
     const p = url.pathname;
 
@@ -71,7 +75,7 @@ http
           body = raw ? JSON.parse(raw) : {};
         } catch {}
         const principal = principalFor(req);
-        if (!principal) return send(res, 401, { error: 'Please sign in' });
+        if (!principal && !r.anonymous) return send(res, 401, { error: 'Please sign in' });
         const out = await run(r.fn, { method: req.method, params, query: Object.fromEntries(url.searchParams), body, principal });
         return send(res, out.status, out.body);
       }
